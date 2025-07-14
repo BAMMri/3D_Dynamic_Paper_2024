@@ -15,7 +15,8 @@
 
 dat <- read.csv('results_dyn_quant.csv')
 
-fig_dir <- 'figs/'
+fig_dir <- 'figs_2/'
+strain_to_use <- 'strain_2'
 
 col2="skyblue2"
 col1="mediumpurple3"
@@ -244,7 +245,7 @@ make_cor_plot_outliers <- function(variable1, variable2, xlims, ylims, title) {
           y = ifelse(!!sym(variable2) < ylims[1], ylims[1], ylims[2]), 
           label = sprintf('%.1f', !!sym(variable2))),
       hjust = 0, 
-      vjust = ~ifelse(!!sym(variable2) < ylims[1], 1.2, -0.2), 
+      vjust = ifelse(df_adjusted %>% filter(!!sym(variable2) < ylims[1] | !!sym(variable2) > ylims[2]) %>% pull(!!sym(variable2)) < ylims[1], 1.2, -0.2), 
       color = rgb(0.3,0.3,0.3), size = 4
     )
   
@@ -258,7 +259,7 @@ make_cor_plot_outliers <- function(variable1, variable2, xlims, ylims, title) {
 ###############################
 
 
-save_plot(make_multiplot_with_outliers("strain_1", "Strain", "Strain per ROI", 0, 0.4))
+save_plot(make_multiplot_with_outliers(strain_to_use, "Strain", "Strain per ROI", 0, 0.4))
 save_plot(make_multiplot_with_outliers("buildup", "Buildup rate [1/s]", "Buildup rate per ROI", 0.02, 0.1))
 save_plot(make_multiplot_with_outliers("release", "Release rate [1/s]", "Release rate per ROI", 0, 0.02))
 save_plot(make_multiplot_with_outliers("FF100", "Fat Fraction [%]", "FF per ROI", 0, 10, 1))
@@ -270,8 +271,8 @@ save_plot(make_multiplot_with_outliers("t2", "Water T2 [ms]", "T2 per ROI", 29.8
 ##
 ###############################
 
-save_plot(make_cor_plot_outliers('FF100','strain_1', c(0,15), c(0,0.5), 'FF and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Fat fraction [%]') + ylab('Strain'))
-save_plot(make_cor_plot_outliers('t2','strain_1', c(25,40), c(0,0.5), 'T2 and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Water T2 [ms]') + ylab('Strain'))
+save_plot(make_cor_plot_outliers('FF100',strain_to_use, c(0,15), c(0,0.5), 'FF and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Fat fraction [%]') + ylab('Strain'))
+save_plot(make_cor_plot_outliers('t2',strain_to_use, c(25,40), c(0,0.5), 'T2 and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Water T2 [ms]') + ylab('Strain'))
 
 ###############################
 ##
@@ -288,7 +289,7 @@ odds_dataframe <- data.frame(
 
 factor_levels <- c()
 
-for(var_to_test in c('strain_1', 'buildup', 'release', 'FF100', 't2')) {
+for(var_to_test in c(strain_to_use, 'buildup', 'release', 'FF100', 't2')) {
   for (roi in c('Soleus', 'GM', 'GL')) {
     V.quantiles = quantile(dat[dat$variable == var_to_test & dat$subj_type == 'V' & dat$ROI == roi, 'value'], c(.25,.50,.75))
     P.quantiles = quantile(dat[dat$variable == var_to_test & dat$subj_type == 'P' & dat$ROI == roi, 'value'], c(.25,.50,.75))
@@ -352,7 +353,7 @@ save_plot(g)
 ###############################
 
 for (var1 in c('FF', 't2')) {
-  for(var2 in c('strain_1', 'buildup', 'release')) {
+  for(var2 in c(strain_to_use, 'buildup', 'release')) {
     correl <- cor.test(df_wide[[var1]], df_wide[[var2]], method = 'spearman', use='complete.obs')
     cat(sprintf('Correlation %s with %s: %.3f (p = %.4f)\n', var2, var1, correl$estimate, correl$p.value))
   }
