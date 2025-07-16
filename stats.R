@@ -15,8 +15,8 @@
 
 dat <- read.csv('results_dyn_quant.csv')
 
-fig_dir <- 'figs_2/'
-strain_to_use <- 'strain_2'
+fig_dir <- 'figs/'
+strain_to_use <- 'strain_1'
 
 col2="skyblue2"
 col1="mediumpurple3"
@@ -273,6 +273,7 @@ save_plot(make_multiplot_with_outliers("t2", "Water T2 [ms]", "T2 per ROI", 29.8
 
 save_plot(make_cor_plot_outliers('FF100',strain_to_use, c(0,15), c(0,0.5), 'FF and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Fat fraction [%]') + ylab('Strain'))
 save_plot(make_cor_plot_outliers('t2',strain_to_use, c(25,40), c(0,0.5), 'T2 and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Water T2 [ms]') + ylab('Strain'))
+save_plot(make_cor_plot_outliers('strain_1', 'strain_2', c(0,0.5), c(-2,0), "Strain 1 and Strain2") + labs(color = 'Subject type', shape = 'Muscle') + xlab('Strain 1') + ylab('Strain 2'))
 
 ###############################
 ##
@@ -358,3 +359,6 @@ for (var1 in c('FF', 't2')) {
     cat(sprintf('Correlation %s with %s: %.3f (p = %.4f)\n', var2, var1, correl$estimate, correl$p.value))
   }
 }
+
+correl <- cor.test(df_wide[['strain_1']], df_wide[['strain_2']], method = 'spearman', use='complete.obs')
+cat(sprintf('Correlation strain_1 with strain_2: %.3f (p = %.4f)\n', correl$estimate, correl$p.value))
