@@ -271,9 +271,9 @@ save_plot(make_multiplot_with_outliers("t2", "Water T2 [ms]", "T2 per ROI", 29.8
 ##
 ###############################
 
-save_plot(make_cor_plot_outliers('FF100',strain_to_use, c(0,15), c(0,0.5), 'FF and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Fat fraction [%]') + ylab('Strain'))
-save_plot(make_cor_plot_outliers('t2',strain_to_use, c(25,40), c(0,0.5), 'T2 and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Water T2 [ms]') + ylab('Strain'))
-save_plot(make_cor_plot_outliers('strain_1', 'strain_2', c(0,0.5), c(-2,0), "Strain 1 and Strain2") + labs(color = 'Subject type', shape = 'Muscle') + xlab('Strain 1') + ylab('Strain 2'))
+save_plot(make_cor_plot_outliers('FF100',strain_to_use, c(0,15), c(0,0.5), 'Fat Fraction and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Fat fraction [%]') + ylab('Strain'))
+save_plot(make_cor_plot_outliers('t2',strain_to_use, c(25,40), c(0,0.5), 'Water T2 and Strain') + labs(color = 'Subject type', shape = 'Muscle') + xlab('Water T2 [ms]') + ylab('Strain'))
+save_plot(make_cor_plot_outliers('strain_1', 'strain_2', c(0,0.5), c(-2,0), "Strain 1 and Strain 2") + labs(color = 'Subject type', shape = 'Muscle') + xlab('Strain 1') + ylab('Strain 2'))
 
 ###############################
 ##
