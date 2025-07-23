@@ -14,6 +14,7 @@
 ############################################################################
 
 dat <- read.csv('results_dyn_quant.csv')
+force_dat <- read.csv('force.csv')
 
 fig_dir <- 'figs/'
 strain_to_use <- 'strain_1'
@@ -254,6 +255,19 @@ make_cor_plot_outliers <- function(variable1, variable2, xlims, ylims, title) {
 
 ###############################
 ##
+## Force plot
+##
+###############################
+
+g <- ggplot (aes(x=subj_type, y=force),data=force_dat)+ylab('Force [N]')+xlab('Subjects')+
+  geom_boxplot(alpha=c(0.2,0.2),col=c(col1,col2),fill=c(col1,col2), lwd=0.8, width=0.3)+
+  geom_point(col="gray", size=1.5)+ # geom_text() + # print point labels
+  ggtitle('Maximum Voluntary Force')+ggplot_theme
+
+save_plot(g)
+
+###############################
+##
 ## Plots per muscle
 ##
 ###############################
@@ -320,6 +334,35 @@ for(var_to_test in c(strain_to_use, 'buildup', 'release', 'FF100', 't2')) {
     factor_levels <- c(factor_levels, sprintf('%s - %s', var_to_test, roi))
   }
 }
+
+V.quantiles = quantile(force_dat[force_dat$subj_type == 'V', 'force'], c(.25,.50,.75))
+P.quantiles = quantile(force_dat[force_dat$subj_type == 'P', 'force'], c(.25,.50,.75))
+
+force_dat$subj_binary <- as.integer(force_dat$subj_type == 'P')
+
+df_filtered <- force_dat
+
+# Standardize 'strain_1'
+df_filtered <- df_filtered %>%
+  mutate(var_standardized = scale(force, center = TRUE, scale = TRUE))
+
+#df_filtered <- na.omit(df_filtered)
+
+model <- glm(subj_binary ~ var_standardized, data = df_filtered, family = binomial)
+
+odds_ratios <- exp(coef(model))
+
+suppressMessages({
+  # Calculate 95% confidence intervals for the model coefficients
+  conf_intervals <- confint(model)
+})
+
+# Exponentiate the confidence intervals to get them for the odds ratios
+exp_conf_intervals <- exp(conf_intervals)
+
+cat(sprintf('%s\t%s\tVolunteers: %.3f (%.3f - %.3f)\tPatients: %.3f (%.3f - %.3f)\tOdds ratios: %.2f (%.2f - %.2f)\n', '', 'Force', V.quantiles[2], V.quantiles[1], V.quantiles[3], P.quantiles[2], P.quantiles[1], P.quantiles[3], odds_ratios[2], exp_conf_intervals[2], exp_conf_intervals[4]))
+odds_dataframe <- add_row(odds_dataframe, Term='Force', OddsRatio = odds_ratios[2], LowerCI = exp_conf_intervals[2], UpperCI = exp_conf_intervals[4])
+factor_levels <- c(factor_levels, 'Force')
 
 ###############################
 ##
